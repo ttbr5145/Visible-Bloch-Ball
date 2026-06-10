@@ -15,8 +15,8 @@
   }
   .container {
     display: grid;
-    grid-template-columns: 1fr 360px;
-    grid-template-rows: auto auto auto;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: auto auto;
     gap: 16px;
     padding: 16px;
     max-width: 1600px;
@@ -26,11 +26,6 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 16px 0 6px;
-  }
-  .viz-area {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
   }
   h1 {
     font-size: 28px;
@@ -45,6 +40,14 @@
     color: #9ba3bf;
     font-size: 14px;
   }
+  .viz-area {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    grid-template-rows: 1fr auto;
+    gap: 12px;
+    grid-column: 1;
+    grid-row: 2;
+  }
   .viz-panel {
     background: rgba(15, 23, 41, 0.6);
     border: 1px solid rgba(79, 195, 247, 0.15);
@@ -52,19 +55,23 @@
     padding: 16px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    grid-row: 1;
   }
   #blochCanvas {
     width: 100%;
-    height: 460px;
+    height: 420px;
     border-radius: 8px;
     cursor: grab;
   }
   #blochCanvas:active { cursor: grabbing; }
-  .viz-area {
+  .gate-panel {
+    grid-row: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    grid-column: 1;
+    gap: 10px;
+  }
+  .coords-panel {
+    grid-column: 1 / -1;
     grid-row: 2;
   }
   .side-panel {
@@ -73,25 +80,6 @@
     gap: 16px;
     grid-column: 2;
     grid-row: 2;
-  }
-  .controls-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-start;
-  }
-  .controls-bar .control-row {
-    flex: 1;
-    min-width: 200px;
-  }
-  .controls-bar .action-row {
-    flex: 0 0 100%;
-  }
-  .controls-bar .coords-grid {
-    flex: 0 0 100%;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
   }
   .card {
     background: rgba(15, 23, 41, 0.7);
@@ -179,18 +167,18 @@
   .gate-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
   .gate-btn {
     background: linear-gradient(135deg, rgba(79, 195, 247, 0.15), rgba(186, 104, 200, 0.15));
     color: #e8eaf0;
     border: 1px solid rgba(79, 195, 247, 0.3);
-    padding: 14px 8px;
+    padding: 12px 6px;
     border-radius: 8px;
     cursor: pointer;
     font-family: "Cambria Math", "Times New Roman", serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     transition: all 0.2s;
     position: relative;
@@ -210,9 +198,9 @@
   .gate-btn.H { border-color: #ab47bc; background: linear-gradient(135deg, rgba(171,71,188,0.12), rgba(186,104,200,0.06)); }
   .gate-btn small {
     display: block;
-    font-size: 10px;
+    font-size: 9px;
     color: #9ba3bf;
-    margin-top: 4px;
+    margin-top: 3px;
     font-style: italic;
     font-weight: normal;
   }
@@ -240,12 +228,11 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-top: 10px;
   }
   .coord-box {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 6px;
-    padding: 8px;
+    padding: 10px 8px;
     text-align: center;
     border: 1px solid rgba(79, 195, 247, 0.1);
   }
@@ -257,13 +244,13 @@
   }
   .coord-box .val {
     font-family: "Consolas", monospace;
-    font-size: 13px;
+    font-size: 14px;
     color: #4fc3f7;
   }
   .explanation {
-    font-size: 12px;
+    font-size: 11px;
     color: #9ba3bf;
-    line-height: 1.7;
+    line-height: 1.6;
     margin-top: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.25);
@@ -276,8 +263,11 @@
   .explanation .gate-z { color: #42a5f5; font-weight: bold; }
   @media (max-width: 1000px) {
     .container { grid-template-columns: 1fr; }
-    .viz-area, .side-panel { grid-column: 1; grid-row: auto; }
+    .viz-area { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+    .side-panel { grid-column: 1; grid-row: auto; }
     #blochCanvas { height: 380px; }
+    .gate-panel { grid-row: 2; }
+    .coords-panel { grid-row: 3; }
   }
 </style>
 </head>
@@ -293,7 +283,38 @@
       <canvas id="blochCanvas"></canvas>
     </div>
 
-    <div class="card controls-bar">
+    <div class="gate-panel card">
+      <h2>🔧 量子门 (点击应用)</h2>
+      <div class="gate-buttons">
+        <button class="gate-btn X" data-gate="X">X<small>绕X π</small></button>
+        <button class="gate-btn Y" data-gate="Y">Y<small>绕Y π</small></button>
+        <button class="gate-btn Z" data-gate="Z">Z<small>绕Z π</small></button>
+        <button class="gate-btn H" data-gate="H">H<small>Hadamard</small></button>
+        <button class="gate-btn" data-gate="X2">√X<small>绕X π/2</small></button>
+        <button class="gate-btn" data-gate="Y2">√Y<small>绕Y π/2</small></button>
+        <button class="gate-btn S" data-gate="S">S<small>绕Z π/2</small></button>
+        <button class="gate-btn T" data-gate="T">T<small>绕Z π/4</small></button>
+      </div>
+    </div>
+
+    <div class="coords-panel card">
+      <h2>📐 Bloch 矢量坐标</h2>
+      <div class="coords-grid">
+        <div class="coord-box"><div class="label">X</div><div class="val" id="blochX">0.00</div></div>
+        <div class="coord-box"><div class="label">Y</div><div class="val" id="blochY">0.00</div></div>
+        <div class="coord-box"><div class="label">Z</div><div class="val" id="blochZ">1.00</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+
+    <div class="card">
+      <h2>🧮 量子态 |ψ⟩</h2>
+      <div class="state-display" id="stateDisplay">
+        |ψ⟩ = <span class="alpha">α</span>|0⟩ + <span class="beta">β</span>|1⟩
+      </div>
+      <div class="formula">α = cos(θ/2), &nbsp; β = e^{iφ}·sin(θ/2)</div>
       <div class="control-row">
         <div class="control-label">
           <span>θ (极角: 0 → π)</span>
@@ -309,10 +330,10 @@
         <input type="range" id="phi" min="0" max="6.28318531" step="0.01" value="0">
       </div>
       <div class="action-row">
-        <button class="action-btn" id="resetBtn">↺ 重置到 |0⟩</button>
-        <button class="action-btn" id="autoRotateBtn">⟳ 自动旋转</button>
+        <button class="action-btn" id="resetBtn">↺ 重置</button>
+        <button class="action-btn" id="autoRotateBtn">⟳ 旋转</button>
       </div>
-      <div class="coords-grid">
+      <div class="coords-grid" style="margin-top: 14px;">
         <div class="coord-box">
           <div class="label">|α|²</div>
           <div class="val" id="prob0">0.50</div>
@@ -327,44 +348,15 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="side-panel">
 
     <div class="card">
-      <h2>🧮 量子态 |ψ⟩</h2>
-      <div class="state-display" id="stateDisplay">
-        |ψ⟩ = <span class="alpha">α</span>|0⟩ + <span class="beta">β</span>|1⟩
-      </div>
-      <div class="formula">α = cos(θ/2), &nbsp; β = e^{iφ}·sin(θ/2)</div>
-      <div class="coords-grid">
-        <div class="coord-box"><div class="label">X</div><div class="val" id="blochX">0.00</div></div>
-        <div class="coord-box"><div class="label">Y</div><div class="val" id="blochY">0.00</div></div>
-        <div class="coord-box"><div class="label">Z</div><div class="val" id="blochZ">1.00</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>🔧 量子门算子 (点击应用)</h2>
-      <div class="gate-buttons">
-        <button class="gate-btn X" data-gate="X">X<small>绕X 轴 π</small></button>
-        <button class="gate-btn Y" data-gate="Y">Y<small>绕Y 轴 π</small></button>
-        <button class="gate-btn Z" data-gate="Z">Z<small>绕Z 轴 π</small></button>
-        <button class="gate-btn H" data-gate="H">H<small>Hadamard</small></button>
-      </div>
-      <div class="gate-buttons">
-        <button class="gate-btn" data-gate="X2">√X<small>绕X 轴 π/2</small></button>
-        <button class="gate-btn" data-gate="Y2">√Y<small>绕Y 轴 π/2</small></button>
-        <button class="gate-btn S" data-gate="S">S<small>绕Z 轴 π/2</small></button>
-        <button class="gate-btn T" data-gate="T">T<small>绕Z 轴 π/4</small></button>
-      </div>
+      <h2>💡 几何意义</h2>
       <div class="explanation">
-        <b>几何意义：</b><br>
-        • <span style="color:#ef5350">X / Y / Z</span>：Pauli 门，绕对应轴旋转 π（X 等价于 NOT）<br>
-        • <span style="color:#ab47bc">H (Hadamard)</span>：把 |0⟩↔|+⟩, |1⟩↔|−⟩，绕 XZ 中分线旋转 π<br>
-        • <span style="color:#f5a623">S 门</span> = [[1,0],[0,i]]：绕 Z 轴旋转 <b>π/2</b>，给 |1⟩ 相位 +i<br>
-        • <span style="color:#e67e22">T 门</span> = [[1,0],[0,e^{iπ/4}]]：绕 Z 轴旋转 <b>π/4</b>，给 |1⟩ 相位 e^{iπ/4}<br>
-        • <b>S·S = Z</b>，<b>T·T = S</b>，<b>T⁴ = Z</b>（S、T 都是 Z 的"方根"族）
+        • <span style="color:#ef5350">X/Y/Z</span>：Pauli 门，绕对应轴旋转 π<br>
+        • <span style="color:#ab47bc">H</span>：Hadamard，|0⟩↔|+⟩<br>
+        • <span style="color:#f5a623">S 门</span>：绕 Z 轴旋转 π/2<br>
+        • <span style="color:#e67e22">T 门</span>：绕 Z 轴旋转 π/4<br>
+        • <b>S·S = Z</b>，<b>T·T = S</b>
       </div>
     </div>
 
